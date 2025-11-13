@@ -244,7 +244,7 @@ services:
       timeout: 5s
       retries: 5
   credential:
-    image: ghcr.io/sunbird-rc/sunbird-rc-credentials-service:${RELEASE_VERSION}
+    image: ghcr.io/sunbird-rc/sunbird-rc-credentials-service:v2.0.1
     ports:
       - "3000:3000"
     depends_on:
