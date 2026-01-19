@@ -352,7 +352,14 @@ services:
       - '80:80'
       - '443:443'
     volumes:
-    - ./imports/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./imports/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      credential:
+        condition: service_healthy
+      credential-schema:
+        condition: service_healthy
+      identity:
+        condition: service_healthy
     # depends_on:
     #   registry:
     #     condition: service_healthy
