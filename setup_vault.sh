@@ -42,14 +42,18 @@ done
 # Remove colors for reliable matching
 clean_vault_status=$(echo "$vault_status" | sed 's/\x1B\[[0-9;]*[JKmsu]//g')
 
-# Check if keys.txt exists and has content
-if [ -s "keys.txt" ]; then
-    echo "keys.txt found. Using existing keys to unseal."
-elif echo "$clean_vault_status" | grep -q "Initialized.*true"; then
-    echo "Vault is initialized already but keys.txt is missing/empty. Cannot proceed!"
-    exit 1
+if echo "$clean_vault_status" | grep -q "Initialized.*true"; then
+    echo "Vault is initialized."
+    # Check if keys.txt exists and has content (size > 0)
+    if [ -s "keys.txt" ]; then
+        echo "keys.txt found. Unsealing..."
+    else
+        echo "CRITICAL ERROR: Vault is initialized (locked) but keys.txt is missing or empty!"
+        echo "Unable to unseal. You must restore keys.txt or wipe vault-data to reset."
+        exit 1
+    fi
 else
-    echo "Initializing Vault..."
+    echo "Vault is NOT initialized. Starting fresh setup..."
     # keys contains ansi escape sequences, remove them if any
     docker-compose -f "$COMPOSE_FILE" exec -T "$SERVICE_NAME" vault operator init > ansi-keys.txt
     sed 's/\x1B\[[0-9;]*[JKmsu]//g' < ansi-keys.txt  > keys.txt
